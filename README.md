@@ -61,7 +61,6 @@ ZENDESK_API_TOKEN=REPLACE_ME
 SHOPIFY_STORE_URL=https://your-shop.myshopify.com
 SHOPIFY_ACCESS_TOKEN=REPLACE_ME
 
-MONGO_URI=mongodb+srv://user:pass@cluster0.mongodb.net/ques
 REDIS_URL=redis://:password@redis-host:6379
 
 PORT=3000
