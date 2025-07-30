@@ -1,5 +1,5 @@
 // backend/schema/index.ts
-import { gql } from 'apollo-server';
+import gql from 'graphql-tag';
 import { ZendeskAPI } from '../adapters/zendesk';
 import { ReamazeAPI }  from '../adapters/reamaze';
 
@@ -22,16 +22,22 @@ export const resolvers = {
       { source }: { source: string },
       { dataSources }: { dataSources: { zendeskAPI: ZendeskAPI; reamazeAPI: ReamazeAPI } }
     ) => {
-      let tickets;
-      if (source === 'zendesk') {
-        tickets = await dataSources.zendeskAPI.listTickets();
-      } else if (source === 'reamaze') {
-        tickets = await dataSources.reamazeAPI.listTickets();
-      } else {
-        throw new Error(`Unknown source: ${source}`);
+      console.log(`[tickets resolver] source=${source}`, 
+                  'available dataSources:', Object.keys(dataSources));
+      try {
+        let tickets;
+        if (source === 'zendesk') {
+          tickets = await dataSources.zendeskAPI.listTickets();
+        } else if (source === 'reamaze') {
+          tickets = await dataSources.reamazeAPI.listTickets();
+        } else {
+          throw new Error(`Unknown source: ${source}`);
+        }
+        return tickets.map(t => ({ ...t, source }));
+      } catch (err) {
+        console.error(`[tickets resolver] error for "${source}":`, err);
+        throw new Error(`Failed fetching ${source} tickets: ${(err as Error).message}`);
       }
-      // attach the source to each ticket
-      return tickets.map(t => ({ ...t, source }));
-    },
-  },
-};
+    }
+  }
+}

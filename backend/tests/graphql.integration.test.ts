@@ -1,5 +1,5 @@
 // backend/tests/graphql.integration.test.ts
-import { ApolloServer } from 'apollo-server';
+import { ApolloServer } from 'apollo-server-express';
 import { createTestClient } from 'apollo-server-testing';
 import gql from 'graphql-tag';
 
@@ -28,11 +28,11 @@ describe('GraphQL Tickets Query', () => {
     server = new ApolloServer({
       typeDefs,
       resolvers,
-      dataSources: () => ({
+      dataSources: (() => ({
         zendeskAPI: zendeskMock,
         reamazeAPI: reamazeMock,
-      }),
-    });
+      }) as any
+    )
   });
 
   const GET_TICKETS = gql`
@@ -74,4 +74,5 @@ describe('GraphQL Tickets Query', () => {
     expect(res.errors).toHaveLength(1);
     expect(res.data).toBeNull();
   });
-});
+})
+})

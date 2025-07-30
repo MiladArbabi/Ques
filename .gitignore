@@ -10,3 +10,18 @@ yarn-error.log
 # VSCode  
 .vscode/
 
+# Local env files
+.env
+.env.example
+
+# Build output
+dist/
+coverage/
+
+# Local env files
+backend/.env
+backend/.env.example
+
+# Backend build & coverage
+backend/dist/
+backend/coverage/

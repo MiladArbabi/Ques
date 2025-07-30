@@ -1,6 +1,7 @@
+// backend/services/shopify/cache.ts
 import Redis from 'ioredis';
 
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis(process.env.REDIS_URL!);
 
 export async function getCached(key: string) {
   const data = await redis.get(key);

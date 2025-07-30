@@ -1,67 +1,71 @@
-// backend/adapters/zendesk/index.test.ts
+process.env.ZENDESK_API_URL   = 'https://zendesk.example.com';
+process.env.ZENDESK_EMAIL     = 'user@example.com';
+process.env.ZENDESK_API_TOKEN = 'secret-token';
 import axios from 'axios';
 import { ZendeskAPI } from './index';
 
 jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mocked = axios as jest.Mocked<typeof axios>;
 
-describe('ZendeskAPI', () => {
+describe('Zendesk Adapter', () => {
   let api: ZendeskAPI;
   const baseUrl = 'https://zendesk.example.com';
   const email = 'user@example.com';
   const token = 'secret-token';
 
-  beforeAll(() => {
-    // set env vars to satisfy non-null assertions
+  beforeEach(() => {
     process.env.ZENDESK_API_URL = baseUrl;
     process.env.ZENDESK_EMAIL = email;
     process.env.ZENDESK_API_TOKEN = token;
-  });
-
-  beforeEach(() => {
     api = new ZendeskAPI();
-    mockedAxios.get.mockReset();
+    mocked.get.mockReset();
   });
 
   it('listTickets should fetch tickets and map id and subject', async () => {
-    const fakeResponse = {
+    const mockResponse = {
       data: {
         tickets: [
-          { id: 1, subject: 'Test 1' },
-          { id: 2, subject: 'Test 2' },
+          { id: 1, subject: 'Hi' },
+          { id: 2, subject: 'Hello' },
         ],
       },
     };
-    mockedAxios.get.mockResolvedValue(fakeResponse);
+    mocked.get.mockResolvedValue(mockResponse as any);
 
     const tickets = await api.listTickets();
 
-    expect(mockedAxios.get).toHaveBeenCalledWith(
+    expect(mocked.get).toHaveBeenCalledWith(
       `${baseUrl}/tickets.json`,
       { auth: { username: `${email}/token`, password: token } }
     );
     expect(tickets).toEqual([
-      { id: '1', subject: 'Test 1' },
-      { id: '2', subject: 'Test 2' },
+      { id: '1', subject: 'Hi' },
+      { id: '2', subject: 'Hello' },
     ]);
   });
 
   it('getTicket should fetch single ticket', async () => {
-    const fakeTicket = { id: 42, subject: 'Single' };
-    const fakeResponse = { data: { ticket: fakeTicket } };
-    mockedAxios.get.mockResolvedValue(fakeResponse);
+    const mockResponse = {
+      data: { ticket: { id: 42, subject: 'Test' } },
+    };
+    mocked.get.mockResolvedValue(mockResponse as any);
 
     const ticket = await api.getTicket('42');
 
-    expect(mockedAxios.get).toHaveBeenCalledWith(
+    expect(mocked.get).toHaveBeenCalledWith(
       `${baseUrl}/tickets/42.json`,
       { auth: { username: `${email}/token`, password: token } }
     );
-    expect(ticket).toEqual(fakeTicket);
+    expect(ticket).toEqual({ id: '42', subject: 'Test' });
   });
 
   it('listTickets should propagate errors thrown by axios', async () => {
-    mockedAxios.get.mockRejectedValue(new Error('network error'));
-    await expect(api.listTickets()).rejects.toThrow('network error');
+    mocked.get.mockRejectedValue(new Error('boom'));
+    await expect(api.listTickets()).rejects.toThrow('boom');
+  });
+
+  it('getTicket should propagate errors thrown by axios', async () => {
+    mocked.get.mockRejectedValue(new Error('boom'));
+    await expect(api.getTicket('42')).rejects.toThrow('boom');
   });
 });

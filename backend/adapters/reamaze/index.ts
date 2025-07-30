@@ -1,28 +1,54 @@
 // backend/adapters/reamaze/index.ts
 import axios from 'axios';
+const ROOT = process.env.REAMAZE_API_URL!.replace(/\/+$/, '');
+const EMAIL    = process.env.REAMAZE_EMAIL!;
+const API_TOKEN = process.env.REAMAZE_API_TOKEN!;
 
-const BASE_URL = process.env.REAMAZE_API_URL!;
-const API_KEY  = process.env.REAMAZE_API_KEY!;
+export interface Ticket { id: string; subject: string; source: string;}
 
 export class ReamazeAPI {
-  private base   = BASE_URL;
-  private headers = {
-    'Authorization': `Bearer ${API_KEY}`,
-    'Content-Type':  'application/json',
-  };
-
-  /** Fetches all tickets (Re:amaze calls them “messages”) */
-  async listTickets(): Promise<{ id: string; subject: string }[]> {
-    const resp = await axios.get(`${this.base}/messages.json`, { headers: this.headers });
-    return resp.data.messages.map((m: any) => ({
-      id: m.id.toString(),
-      subject: m.subject,
-    }));
+  async listTickets(): Promise<Ticket[]> {
+    try {
+      console.log(`[ReamazeAPI] listTickets → GET ${ROOT}/api/v1/conversations.json`);
+      const resp = await axios.get(
+        `${ROOT}/api/v1/conversations.json`,
+        {
+          auth: { username: EMAIL, password: API_TOKEN },
+          headers: { Accept: 'application/json' }
+        }
+      );
+      console.log('[ReamazeAPI] response.data.conversations:', resp.data.conversations);
+      return resp.data.conversations.map((c: any) => ({
+        id: c.id.toString(),
+        subject: c.subject || c.preview,  // adapt to whatever field holds your “ticket” summary
+        source: 'reamaze',
+      }));
+    } catch (err) {
+      console.error('[ReamazeAPI] listTickets failed:', err);
+      throw new Error(`Reamaze listTickets error: ${(err as Error).message}`);
+    }
   }
 
-  /** Fetch a single message/ticket */
-  async getTicket(id: string): Promise<any> {
-    const resp = await axios.get(`${this.base}/tickets/${id}.json`, { headers: this.headers });
-    return resp.data.ticket;
+async getTicket(id: string): Promise<Ticket> {
+    try {
+      console.log(`[ReamazeAPI] getTicket → GET ${ROOT}/tickets/${id}.json`);
+      const resp = await axios.get(
+         `${ROOT}/api/v1/conversations.json`,
+        {
+          auth: { username: EMAIL, password: API_TOKEN },
+          headers: { Accept: 'application/json' }
+        }
+      );
+      console.log('[ReamazeAPI] getTicket response.data.ticket:', resp.data.conversations);
+      const t = resp.data.conversations;
+      return t.map((c: any) => ({
+        id: c.id.toString(),
+        subject: c.subject || c.preview || '(no subject)',
+        source: 'reamaze',
+      }));
+    } catch (err) {
+      console.error('[ReamazeAPI] getTicket failed:', err);
+      throw new Error(`Reamaze getTicket error: ${(err as Error).message}`);
+    }
   }
 }

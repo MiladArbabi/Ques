@@ -21,8 +21,12 @@
     "types": ["node", "jest"]
   },
   "include": [
-    "./**/*.ts"        /* pick up everything under backend/ */,
-    "./**/*.test.ts"
+    "*.ts", 
+    "webhooks/**/*.ts",
+    "tests/**/*.ts",
+    "adapters/**/*.ts",
+    "schema/**/*.ts",
+    "services/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }
