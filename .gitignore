@@ -25,3 +25,4 @@ backend/.env.example
 # Backend build & coverage
 backend/dist/
 backend/coverage/
+frontend-mobile/
