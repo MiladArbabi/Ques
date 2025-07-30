@@ -1,20 +1,25 @@
-# Ques  
-Cross‑platform customer‑service automation for e‑commerce.  
+# Ques
 
-## Repo layout  
-- **backend/** — Node.js microservices, adapters, GraphQL  
-- **frontend-web/** — Next.js PWA dashboard  
-- **frontend-mobile/** — Expo‑based React Native app  
+Cross‑platform customer‑service automation for e‑commerce.
 
-## Getting started  
-1. Clone & install dependencies  
-2. Spin up services in parallel (backend → web → mobile)  
-3. See each sub‑folder’s README for details  
+## Repo layout
 
-## Contributing  
-- Follow the TDD workflow (write failing tests first)  
-- Use feature branches: `feature/<short‑desc>`  
-- Draft PRs against `develop`  
+* **backend/** — Node.js microservices, adapters, GraphQL
+* **frontend-web/** — Next.js PWA dashboard
+* **frontend-mobile/** — Expo‑based React Native app
 
-## Code of Conduct  
-See [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
+## Getting started
+
+1. Clone & install dependencies
+2. Spin up services in parallel (backend → web → mobile)
+3. See each sub‑folder’s README for details
+
+## Contributing
+
+* Follow the TDD workflow (write failing tests first)
+* Use feature branches: `feature/<short‑desc>`
+* Draft PRs against `develop`
+
+## Code of Conduct
+
+See [CODE\_OF\_CONDUCT.md](./CODE_OF_CONDUCT.md)
