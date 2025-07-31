@@ -21,7 +21,25 @@ Que! is built as a set of independent, plug‑and‑play modules that can be ado
 * **GraphQL API**
   Unified schema exposing tickets, orders, draft orders, social posts, and warehouse tasks. Supports both queries and mutations for each domain.
 
-* **Frontend UIs**
+### Fetch an order by ID
+query GetOrder($orderId: String!) {
+  order(orderId: $orderId) {
+    id
+    total
+  }
+}
+
+Response:
+{
+  "data": {
+    "order": {
+      "id": "42",
+      "total": 123.45
+    }
+  }
+}
+
+***Frontend UIs**
 
   * **Dashboard (Next.js PWA)**: Real‑time analytics for tickets/orders, chat interface, and social calendar view.
   * **Mobile App (Expo)**: On‑the‑go notifications, warehouse workflows, and post scheduling.
