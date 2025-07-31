@@ -4,7 +4,7 @@ import { getCached, setCached } from './cache';
 
 const SHOPIFY_URL = process.env.SHOPIFY_STORE_URL!;
 const ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN!;
-const API_VERSION = '2024-10'; 
+const API_VERSION = '2025-07'; 
 
 export async function getOrder(orderId: string) {
   const cacheKey = `shopify:order:${orderId}`;

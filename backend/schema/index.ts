@@ -2,6 +2,7 @@
 import gql from 'graphql-tag';
 import { ZendeskAPI } from '../adapters/zendesk';
 import { ReamazeAPI }  from '../adapters/reamaze';
+import { classifyMessage } from '../services/ai';
 
 export const typeDefs = gql`
   type Ticket {
@@ -10,8 +11,16 @@ export const typeDefs = gql`
     source: String!
   }
 
+  type Classification {
+    category: String!
+  }
+
   type Query {
     tickets(source: String!): [Ticket!]!
+  }
+
+  type Mutation {
+    classifyMessage(text: String!): Classification!
   }
 `;
 
@@ -39,5 +48,11 @@ export const resolvers = {
         throw new Error(`Failed fetching ${source} tickets: ${(err as Error).message}`);
       }
     }
+    },
+    Mutation: {
+    classifyMessage: async (_: any, { text }: { text: string }) => {
+      const { category } = await classifyMessage(text);
+      return { category };
+      }
   }
 }

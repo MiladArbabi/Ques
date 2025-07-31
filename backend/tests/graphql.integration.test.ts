@@ -34,6 +34,13 @@ describe('GraphQL Tickets Query', () => {
       }) as any
     )
   });
+})
+
+  const CLASSIFY = gql`
+    mutation Classify($text: String!) {
+      classifyMessage(text: $text) { category }
+    }
+  `;
 
   const GET_TICKETS = gql`
     query Tickets($source: String!) {
@@ -70,9 +77,24 @@ describe('GraphQL Tickets Query', () => {
     const res = await query({
       query: gql`query { tickets(source: "foo") { id } }`
     });
-
     expect(res.errors).toHaveLength(1);
     expect(res.data).toBeNull();
   });
-})
-})
+
+  it('classifies via AI stub', async () => {
+    const { mutate } = createTestClient(server as any);
+    const res = await mutate({ mutation: CLASSIFY, variables: { text: 'refund' } });
+    expect(res.errors).toBeUndefined();
+    expect(res.data).toEqual({ classifyMessage: { category: 'support' } });
+  });
+
+    it('classifies a message via AI stub', async () => {
+    const { mutate } = createTestClient(server as any);
+    const res = await mutate({
+      mutation: CLASSIFY,
+      variables: { text: 'I would like a refund please' }
+    });
+    expect(res.errors).toBeUndefined();
+    expect(res.data).toEqual({ classifyMessage: { category: 'support' } });
+    });
+  })
