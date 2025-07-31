@@ -19,7 +19,9 @@ export class ReamazeAPI {
       );
       const convos = resp.data.conversations as any[];
       return convos.map(c => ({
-        id: String(c.id),
+        id: c.id != null 
+           ? String(c.id) 
+           : (c.slug as string),
         subject: c.subject || c.preview || '(no subject)',
         source: 'reamaze',
       }));
