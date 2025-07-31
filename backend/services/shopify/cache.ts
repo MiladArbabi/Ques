@@ -11,3 +11,5 @@ export async function getCached(key: string) {
 export async function setCached(key: string, value: any, ttl = 60) {
   await redis.set(key, JSON.stringify(value), 'EX', ttl);
 }
+
+export const redisClient = redis;
