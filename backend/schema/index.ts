@@ -4,6 +4,7 @@ import { ZendeskAPI } from '../adapters/zendesk';
 import { ReamazeAPI }  from '../adapters/reamaze';
 import { classifyMessage } from '../services/ai';
 import { generateChatLink } from '../services/chat/session';
+import { getOrder } from '../services/shopify';
 
 export const typeDefs = gql`
   type Ticket {
@@ -16,8 +17,14 @@ export const typeDefs = gql`
     category: String!
   }
 
+  type Order {
+    id: ID!
+    total: Float!
+  }
+
   type Query {
     tickets(source: String!): [Ticket!]!
+    order(orderId: String!): Order!
   }
 
   type Mutation {
@@ -49,6 +56,9 @@ export const resolvers = {
         console.error(`[tickets resolver] error for "${source}":`, err);
         throw new Error(`Failed fetching ${source} tickets: ${(err as Error).message}`);
       }
+    },
+    order: async (_: any, { orderId }: { orderId: string }) => {
+      return await getOrder(orderId);
     }
   },
 

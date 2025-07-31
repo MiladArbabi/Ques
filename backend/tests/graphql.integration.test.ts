@@ -3,6 +3,10 @@ import { ApolloServer } from 'apollo-server-express';
 import { createTestClient } from 'apollo-server-testing';
 import gql from 'graphql-tag';
 
+jest.mock('../services/shopify', () => ({
+  getOrder: jest.fn().mockResolvedValue({ id: '42', total: 123.45 }),
+}));
+
 import { typeDefs, resolvers } from '../schema/index';
 import { ZendeskAPI } from '../adapters/zendesk';
 import { ReamazeAPI }  from '../adapters/reamaze';
@@ -53,6 +57,15 @@ describe('GraphQL Tickets Query', () => {
   const CREATE_SESSION = gql`
     mutation CreateSession($ticketId: String!) {
       createSession(ticketId: $ticketId)
+    }
+  `;
+
+  const GET_ORDER = gql`
+    query Order($orderId: String!) {
+      order(orderId: $orderId) {
+        id
+        total
+      }
     }
   `;
 
@@ -109,5 +122,12 @@ describe('GraphQL Tickets Query', () => {
     expect(res.data).toEqual({
       createSession: `https://chat.ques.com/session/${ticketId}`
     });
+  });
+
+  it('fetches an order by ID', async () => {
+    const { query } = createTestClient(server as any);
+    const res = await query({ query: GET_ORDER, variables: { orderId: '42' } });
+    expect(res.errors).toBeUndefined();
+    expect(res.data).toEqual({ order: { id: '42', total: 123.45 } });
   });
 })
