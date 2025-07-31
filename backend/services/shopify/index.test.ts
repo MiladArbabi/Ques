@@ -1,3 +1,4 @@
+// backend/services/shopify/index.test.ts
 process.env.SHOPIFY_STORE_URL   = 'https://shop.test';
 process.env.SHOPIFY_ACCESS_TOKEN = 'sh-token';
 jest.mock('axios');

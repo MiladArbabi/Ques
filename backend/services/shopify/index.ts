@@ -16,7 +16,7 @@ export async function getOrder(orderId: string) {
   const resp = await axios.get(url, {
     headers: { 'X-Shopify-Access-Token': ACCESS_TOKEN }
   });
-  const draft = resp.data.draft_order;
-  await setCached(cacheKey, draft, 300);
-  return draft;
+  const order = resp.data.order;
+  await setCached(cacheKey, order, 300);
+  return order;
 }
