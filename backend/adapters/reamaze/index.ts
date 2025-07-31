@@ -17,10 +17,10 @@ export class ReamazeAPI {
           headers: { Accept: 'application/json' }
         }
       );
-      console.log('[ReamazeAPI] response.data.conversations:', resp.data.conversations);
-      return resp.data.conversations.map((c: any) => ({
-        id: c.id.toString(),
-        subject: c.subject || c.preview,  // adapt to whatever field holds your “ticket” summary
+      const convos = resp.data.conversations as any[];
+      return convos.map(c => ({
+        id: String(c.id),
+        subject: c.subject || c.preview || '(no subject)',
         source: 'reamaze',
       }));
     } catch (err) {
@@ -31,21 +31,20 @@ export class ReamazeAPI {
 
 async getTicket(id: string): Promise<Ticket> {
     try {
-      console.log(`[ReamazeAPI] getTicket → GET ${ROOT}/tickets/${id}.json`);
+      console.log(`[ReamazeAPI] getTicket → GET ${ROOT}/api/v1/conversations/${id}.json`);
       const resp = await axios.get(
-         `${ROOT}/api/v1/conversations.json`,
+        `${ROOT}/api/v1/conversations/${id}.json`,
         {
           auth: { username: EMAIL, password: API_TOKEN },
           headers: { Accept: 'application/json' }
         }
       );
-      console.log('[ReamazeAPI] getTicket response.data.ticket:', resp.data.conversations);
-      const t = resp.data.conversations;
-      return t.map((c: any) => ({
-        id: c.id.toString(),
+      const c = resp.data.conversation as any;
+      return {
+        id: String(c.id),
         subject: c.subject || c.preview || '(no subject)',
         source: 'reamaze',
-      }));
+      };
     } catch (err) {
       console.error('[ReamazeAPI] getTicket failed:', err);
       throw new Error(`Reamaze getTicket error: ${(err as Error).message}`);

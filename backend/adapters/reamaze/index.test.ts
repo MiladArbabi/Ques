@@ -1,6 +1,7 @@
 // backend/adapters/reamaze/index.test.ts
-process.env.REAMAZE_API_URL = 'https://reamaze.example.com';
-process.env.REAMAZE_API_KEY = 'test-api-key';
+process.env.REAMAZE_API_URL    = 'https://reamaze.example.com';
+process.env.REAMAZE_EMAIL      = 'user@example.com';
+process.env.REAMAZE_API_TOKEN = 'test-token';
 import axios from 'axios'
 import { ReamazeAPI } from '../reamaze'
 
@@ -9,42 +10,45 @@ const mocked = axios as jest.Mocked<typeof axios>
 
 describe('Re:amaze Adapter', () => {
   let api: ReamazeAPI
-  const baseUrl = 'https://reamaze.example.com'
-  const apiKey = 'test-api-key'
+  const baseUrl   = 'https://reamaze.example.com'
+  const email     = 'user@example.com'
+  const apiToken = 'test-token'
 
   beforeAll(() => {
-    process.env.REAMAZE_API_URL = baseUrl
-    process.env.REAMAZE_API_KEY = apiKey
+    process.env.REAMAZE_API_URL    = baseUrl
+    process.env.REAMAZE_EMAIL      = email
+    process.env.REAMAZE_API_TOKEN = apiToken
     api = new ReamazeAPI()
   })
 
   afterAll(() => {
     delete process.env.REAMAZE_API_URL
-    delete process.env.REAMAZE_API_KEY
+    delete process.env.REAMAZE_EMAIL
+    delete process.env.REAMAZE_API_TOKEN
   })
 
   describe('listTickets()', () => {
     it('fetches message list & maps id and subject', async () => {
-      const fakeMessages = [
-        { id: 10, subject: 'Msg 1' },
-        { id: 11, subject: 'Msg 2' },
+      const fakeConvos = [
+        { id: 10, subject: 'Hello' },
+        { id: 11, preview: 'Preview only' },
       ]
-      mocked.get.mockResolvedValueOnce({ data: { messages: fakeMessages } })
+      mocked.get.mockResolvedValueOnce({
+        data: { conversations: fakeConvos }
+      })
 
       const tickets = await api.listTickets()
 
       expect(mocked.get).toHaveBeenCalledWith(
-        `${baseUrl}/messages.json`,
+        `${baseUrl}/api/v1/conversations.json`,
         {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
+          auth: { username: email, password: apiToken },
+          headers: { Accept: 'application/json' }
         }
       )
       expect(tickets).toEqual([
-        { id: '10', subject: 'Msg 1', source: 'reamaze' },
-        { id: '11', subject: 'Msg 2', source: 'reamaze' },
+        { id: '10', subject: 'Hello', source: 'reamaze' },
+        { id: '11', subject: 'Preview only', source: 'reamaze' },
       ])
     })
 
@@ -57,23 +61,23 @@ describe('Re:amaze Adapter', () => {
 
   describe('getTicket()', () => {
     it('fetches a single ticket & maps correctly', async () => {
-      const fakeTicket = { id: 5, subject: 'Single', body: '...' }
-      mocked.get.mockResolvedValueOnce({ data: { ticket: fakeTicket } })
+      const fakeConv = { id: 5, preview: 'Only preview', subject: 'Full subject' }
+      mocked.get.mockResolvedValueOnce({
+        data: { conversation: fakeConv }
+      })
 
       const ticket = await api.getTicket('5')
 
       expect(mocked.get).toHaveBeenCalledWith(
-        `${baseUrl}/tickets/5.json`,
+        `${baseUrl}/api/v1/conversations/5.json`,
         {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
+          auth: { username: email, password: apiToken },
+          headers: { Accept: 'application/json' }
         }
       )
       expect(ticket).toEqual({
         id: '5',
-        subject: 'Single',
+        subject: 'Full subject',
         source: 'reamaze',
       })
     })

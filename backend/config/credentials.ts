@@ -1,3 +1,4 @@
+// backend/config/credentials.ts
 export const getConfig = () => ({
   reamazeApiKey: process.env.REAMAZE_API_KEY!,
   zendeskApiToken: process.env.ZENDESK_API_TOKEN!,
