@@ -19,12 +19,14 @@
     "ts-node-dev": "^2.0.0"
   },
   "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
     "apollo-server-core": "^3.13.0",
     "apollo-server-express": "^3.13.0",
     "axios": "^1.11.0",
     "dotenv": "^16.x",
     "express": "^4.21.2",
     "graphql": "^15.10.1",
-    "ioredis": "^5.6.1"
+    "ioredis": "^5.6.1",
+    "twilio": "^5.8.0"
   }
 }
