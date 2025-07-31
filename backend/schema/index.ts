@@ -3,6 +3,7 @@ import gql from 'graphql-tag';
 import { ZendeskAPI } from '../adapters/zendesk';
 import { ReamazeAPI }  from '../adapters/reamaze';
 import { classifyMessage } from '../services/ai';
+import { generateChatLink } from '../services/chat/session';
 
 export const typeDefs = gql`
   type Ticket {
@@ -21,6 +22,7 @@ export const typeDefs = gql`
 
   type Mutation {
     classifyMessage(text: String!): Classification!
+    createSession(ticketId: String!): String!
   }
 `;
 
@@ -48,11 +50,15 @@ export const resolvers = {
         throw new Error(`Failed fetching ${source} tickets: ${(err as Error).message}`);
       }
     }
-    },
-    Mutation: {
+  },
+
+  Mutation: {
     classifyMessage: async (_: any, { text }: { text: string }) => {
       const { category } = await classifyMessage(text);
       return { category };
-      }
+    },
+    createSession: (_: any, { ticketId }: { ticketId: string }) => {
+      return generateChatLink(ticketId);
+    }
   }
 }

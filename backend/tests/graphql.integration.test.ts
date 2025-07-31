@@ -4,8 +4,6 @@ import { createTestClient } from 'apollo-server-testing';
 import gql from 'graphql-tag';
 
 import { typeDefs, resolvers } from '../schema/index';
-
-// point at your adapters folder, not dataSources:
 import { ZendeskAPI } from '../adapters/zendesk';
 import { ReamazeAPI }  from '../adapters/reamaze';
 
@@ -25,22 +23,15 @@ describe('GraphQL Tickets Query', () => {
     const zendeskMock = { listTickets: jest.fn().mockResolvedValue(mockZendesk) } as any as ZendeskAPI;
     const reamazeMock = { listTickets: jest.fn().mockResolvedValue(mockReamaze) } as any as ReamazeAPI;
 
-    server = new ApolloServer({
+  server = new ApolloServer({
       typeDefs,
       resolvers,
-      dataSources: (() => ({
+      dataSources: () => ({
         zendeskAPI: zendeskMock,
         reamazeAPI: reamazeMock,
-      }) as any
-    )
+      }) as any,
+    });
   });
-})
-
-  const CLASSIFY = gql`
-    mutation Classify($text: String!) {
-      classifyMessage(text: $text) { category }
-    }
-  `;
 
   const GET_TICKETS = gql`
     query Tickets($source: String!) {
@@ -52,31 +43,40 @@ describe('GraphQL Tickets Query', () => {
     }
   `;
 
+
+  const CLASSIFY = gql`
+    mutation Classify($text: String!) {
+      classifyMessage(text: $text) { category }
+    }
+  `;
+
+  const CREATE_SESSION = gql`
+    mutation CreateSession($ticketId: String!) {
+      createSession(ticketId: $ticketId)
+    }
+  `;
+
   it('resolves Zendesk tickets', async () => {
     const { query } = createTestClient(server as any);
     const res = await query({ query: GET_TICKETS, variables: { source: 'zendesk' } });
-
-    expect(res.errors).toBeUndefined();
-    expect(res.data).toEqual({
-      tickets: mockZendesk.map(t => ({ ...t, source: 'zendesk' })),
+      expect(res.errors).toBeUndefined();
+      expect(res.data).toEqual({
+        tickets: mockZendesk.map(t => ({ ...t, source: 'zendesk' })),
     });
   });
 
   it('resolves Re:amaze tickets', async () => {
     const { query } = createTestClient(server as any);
     const res = await query({ query: GET_TICKETS, variables: { source: 'reamaze' } });
-
-    expect(res.errors).toBeUndefined();
-    expect(res.data).toEqual({
-      tickets: mockReamaze.map(t => ({ ...t, source: 'reamaze' })),
+      expect(res.errors).toBeUndefined();
+      expect(res.data).toEqual({
+        tickets: mockReamaze.map(t => ({ ...t, source: 'reamaze' })),
     });
   });
 
   it('errors on unknown source', async () => {
     const { query } = createTestClient(server as any);
-    const res = await query({
-      query: gql`query { tickets(source: "foo") { id } }`
-    });
+    const res = await query({ query: gql`query { tickets(source: "foo") { id } }` });
     expect(res.errors).toHaveLength(1);
     expect(res.data).toBeNull();
   });
@@ -88,7 +88,7 @@ describe('GraphQL Tickets Query', () => {
     expect(res.data).toEqual({ classifyMessage: { category: 'support' } });
   });
 
-    it('classifies a message via AI stub', async () => {
+  it('classifies a longer message via AI stub', async () => {
     const { mutate } = createTestClient(server as any);
     const res = await mutate({
       mutation: CLASSIFY,
@@ -96,5 +96,18 @@ describe('GraphQL Tickets Query', () => {
     });
     expect(res.errors).toBeUndefined();
     expect(res.data).toEqual({ classifyMessage: { category: 'support' } });
+  });
+
+  it('creates chat session link', async () => {
+    const { mutate } = createTestClient(server as any);
+    const ticketId = '123';
+    const res = await mutate({
+      mutation: CREATE_SESSION,
+      variables: { ticketId }
     });
-  })
+    expect(res.errors).toBeUndefined();
+    expect(res.data).toEqual({
+      createSession: `https://chat.ques.com/session/${ticketId}`
+    });
+  });
+})
